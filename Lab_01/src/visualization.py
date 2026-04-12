@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from eda import entropy_table
 
 def frec_plot(df):
     # Lista de columnas codificadas
@@ -38,3 +39,13 @@ def frec_plot(df):
     plt.legend()
     plt.show()
 
+
+def entropy_plot(df):
+    entropias = entropy_table(df)
+
+    plt.bar(entropias.index, entropias["entropy"])
+    plt.xlabel("Label")
+    plt.ylabel("Entropia")
+    plt.title("Entropia normalizada de frecuencias por label")
+
+    plt.show()
