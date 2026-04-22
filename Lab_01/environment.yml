@@ -1,0 +1,9 @@
+name: lab01_dl
+channels:
+  - https://conda.anaconda.org/conda-forge
+dependencies:
+  - python=3.10
+  - pandas
+  - matplotlib
+  - pyreadstat
+  - scikit-learn
