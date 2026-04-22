@@ -1,7 +1,9 @@
+
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
+from scipy.stats import randint, uniform
 
 
 # NOTESE QUE:
@@ -18,44 +20,41 @@ from sklearn.svm import SVC
 #
 
 
+
 classifiers = {
 
-    # Naive Bayes: modelo probabilístico, no tiene muchos hiperparámetros
-    # GaussianNB asume distribución normal de los datos
     'NaiveBayes': {
         'classifier': GaussianNB(),
         'params': {
-            'var_smoothing': [1e-7, 1e-6] #estabiliza la varianza de variables con poca. vuelve el modelo mas suave.
+            'classifier__var_smoothing': uniform(1e-10, 1e-5)
         }
     },
 
-    # Random Forest: conjunto de árboles, reduce overfitting
     'RandomForest': {
         'classifier': RandomForestClassifier(random_state=42),
         'params': {
-            'classifier__n_estimators': [50, 100, 200],
-            'classifier__max_depth': [5, None],
-            'classifier__min_samples_split': [2, 10]
+            'classifier__n_estimators': randint(50, 200),
+            'classifier__max_depth': randint(3, 30),
+            'classifier__min_samples_split': randint(2, 15)
         }
     },
 
-    # Logistic Regression: regularización controla complejidad del modelo
     'LogisticRegression': {
-        'classifier': LogisticRegression(random_state=42, max_iter=200),
+        'classifier': LogisticRegression(random_state=42),
         'params': {
+            'classifier__max_iter': randint(200, 1000),
             'classifier__penalty': ['l1', 'l2'],
-            'classifier__C': [0.1, 1], #inverso a la regularización.
-            'classifier__solver': ['liblinear']
+            'classifier__C': uniform(0.01, 5),
+            'classifier__solver': ['saga']
         }
     },
 
-    # SVM: margen máximo entre clases
     'SVM': {
-        'classifier': SVC(random_state=42),
+        'classifier': SVC(random_state=42, class_weight='balanced'),
         'params': {
             'classifier__kernel': ['linear', 'rbf'],
-            'classifier__C': [0.1, 1], #C mas grande, mas penalizacion.
-            'classifier__gamma': ['scale']  # solo afecta rbf, no se usara auto debido a que son clases desbalanceadas y scale considera la varianza para calcular el gamma.
+            'classifier__C': uniform(0.1, 10),
+            'classifier__gamma': ['scale', 'auto']
         }
     }
 }
