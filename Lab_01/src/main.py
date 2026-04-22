@@ -18,9 +18,9 @@ from config import DATA_PATH, GDS_R2_RESULTS_PATH, GDS_RESULTS_PATH, RAW_DATA_PA
 df_15_raw = data_loader(RAW_DATA_PATH)
 
 #identificamos outliers y missing values:
-# eda.ouliers_seeker(df_15_raw, 0, df_15_raw.columns.to_list().index('GDS'))
-# eda.missing_values(df_15_raw)
-# eda.feauters_labels_count(df_15_raw)
+eda.ouliers_seeker(df_15_raw, 0, df_15_raw.columns.to_list().index('GDS'))
+eda.missing_values(df_15_raw)
+eda.feauters_labels_count(df_15_raw)
 
 
 
@@ -41,27 +41,22 @@ X_TRAIN, X_TEST, Y_TRAIN_GDS, Y_TEST_GDS = train_test_split(X, Y_GDS, test_size=
 X_TRAIN, X_TEST, Y_TRAIN_GDS_R2, Y_TEST_GDS_R2 = train_test_split(X, Y_GDS_R2, test_size=0.4, random_state=0, stratify=Y_GDS_R2)
 
 
-#frec_plot(df_15)
-#entropy_plot(df_15[labels])
+frec_plot(df_15)
+entropy_plot(df_15[labels])
 #debido a que la entropia define desorden, ejemplo (el desorden perfecto para 2 clases son frecuencias de 50/50)
 #En este contexto la entropia representa balanceo, por lo que a mayor entropria mas balanceadas estan las clases.
 
 
 #PARA GDS
-#results_dataframe = tr.random_train(X_TRAIN, Y_TRAIN_GDS, X_TEST, Y_TEST_GDS)
-#eda.make_csv(results_dataframe[0], GDS_RESULTS_PATH, idx=True)
+results_dataframe = tr.random_train(X_TRAIN, Y_TRAIN_GDS, X_TEST, Y_TEST_GDS)
+eda.make_csv(results_dataframe[0], GDS_RESULTS_PATH, idx=True)
 
 #PARA GDS_R2
-#results_dataframe = tr.random_train(X_TRAIN, Y_TRAIN_GDS_R2, X_TEST, Y_TEST_GDS_R2)
-#eda.make_csv(results_dataframe[0], GDS_R2_RESULTS_PATH, idx=True)
+results_dataframe = tr.random_train(X_TRAIN, Y_TRAIN_GDS_R2, X_TEST, Y_TEST_GDS_R2)
+eda.make_csv(results_dataframe[0], GDS_R2_RESULTS_PATH, idx=True)
 
 
-#recordar para que etiqueta corresponde cada uno.
 #Debido a que ya creamos los modelos, ya no es necesario correr el random search. ahora extraemos los datos desde los dataframes guardados.
-
-#Para gds
-#gds
-
 gds_ensamble_models = {model_name: MODELS[model_name](GDS_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS, X_test=X_TEST, Y_test=Y_TEST_GDS)
                         for model_name in Model_names}
 gds_r2_ensamble_models = {model_name: MODELS[model_name](GDS_R2_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS_R2, X_test=X_TEST, Y_test=Y_TEST_GDS_R2)

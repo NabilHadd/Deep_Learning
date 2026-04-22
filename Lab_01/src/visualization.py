@@ -18,11 +18,9 @@ def frec_plot(df):
     plt.figure(figsize=(8, 6))
 
     for exp in experiments:
-        print(exp)
 
         # Obtener conteo de valores únicos ordenados por índice
         counts = df[exp].value_counts().sort_index()
-        print(counts)
 
         # Crear lista completa de clases (del 1 al 7), completando con 0 si falta alguna
         classes = list(range(1, 8))
@@ -34,8 +32,6 @@ def frec_plot(df):
         sum_width += width
 
         # Mostrar conteo en consola
-        print(counts)
-        print('=' * 60)
 
     # Etiquetas y leyenda
     plt.title('Frecuencias de valores de clases vs tipos de codificación')
