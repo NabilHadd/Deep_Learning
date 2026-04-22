@@ -2,9 +2,14 @@ import numpy as np
 import pandas as pd
 
 
-def make_csv(df, output):
-    df = erase_index(df)
-    df.to_csv(path_or_buf=output, sep=';', na_rep='-', index=False)
+def make_csv(df, output, idx=False):
+    if idx :
+        df.to_csv(path_or_buf=output, sep=';', na_rep='-', index=False)
+    else:
+        df = erase_index(df)
+        df.to_csv(path_or_buf=output, sep=';', na_rep='-', index=False)
+    
+    
 
 
 def missing_values(df):

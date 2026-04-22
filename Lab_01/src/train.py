@@ -5,6 +5,11 @@ from preprocessing import preprocessors
 from classifiers import classifiers
 from sklearn.model_selection import LeaveOneOut
 import pandas as pd
+import json
+
+
+path = "data/outputs/models"
+
 
 def view_config():
     for prep_name, prep_config in preprocessors.items():
@@ -20,6 +25,7 @@ def random_train(X_train, Y_train, X_val, Y_val):
 
     print("\n\033[33m=== EJECUCIÓN DE EXPERIMENTOS ===\033[0m")
     results = []
+    best_models = []
 
     for prep_name, prep_config in preprocessors.items():
         print(f"\033[31m\n--- Preprocesamiento: {prep_name} ---\033[0m")
@@ -71,16 +77,20 @@ def random_train(X_train, Y_train, X_val, Y_val):
 
             # Guardar resultados
             results.append({
-                "index":  1,
                 "preprocessor": prep_name,
                 "classifier": clf_name,
-                "model": random_search.best_estimator_,
-                "best_params": random_search.best_params_,
+                "best_params": json.dumps(random_search.best_params_),
                 "accuracy": accuracy,
                 "precision": precision,
                 "recall": recall,
                 "f1_score": f1
             })
+            
+            best_models.append({
+                "name": f"{prep_name}_{clf_name}",
+                "model": random_search.best_estimator_
+            })
+            
 
     return pd.DataFrame(results)
 

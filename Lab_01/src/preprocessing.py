@@ -18,11 +18,12 @@ class CorrelationDropper(BaseEstimator, TransformerMixin):
         self.to_drop_ = None
 
     def fit(self, X, y=None):
-        corr = X.corr().abs()
+        X = pd.DataFrame(X)  
 
-        triu_mask = np.triu(np.ones(corr.shape), k=1).astype(bool) #creamos una mascara trinagular superior
-        upper = corr.where(triu_mask) #se aplica
-        self.to_drop_ = [col for col in upper.columns if any(upper[col] > self.threshold)] #guarda las columnas que no cumplen con el threshold
+        corr = X.corr().abs()
+        upper = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
+
+        self.to_drop_ = [col for col in upper.columns if any(upper[col] > self.threshold)]
         return self
 
     def transform(self, X):

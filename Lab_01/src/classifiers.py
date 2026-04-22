@@ -50,7 +50,7 @@ classifiers = {
     },
 
     'SVM': {
-        'classifier': SVC(random_state=42, class_weight='balanced'),
+        'classifier': SVC(random_state=42, class_weight='balanced', probability=True),
         'params': {
             'classifier__kernel': ['linear', 'rbf'],
             'classifier__C': uniform(0.1, 10),
