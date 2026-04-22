@@ -1,19 +1,16 @@
 from sklearn.model_selection import train_test_split
 
 from data_loader import data_loader
-from visualization import frec_plot, entropy_plot, plot_roc_multilabel, plot_pr_multilabel
+from visualization import frec_plot, entropy_plot, plot_roc_multiclass, confusion_matrix_plot
 import eda
 import train as tr
 from stacking import stacking
 from bagging import bagging
 from boosting import boosting
+from config import DATA_PATH, GDS_R2_RESULTS_PATH, GDS_RESULTS_PATH, RAW_DATA_PATH,  GDS_CLASSES, GDS_R2_CLASSES, SAVE_IMAGES_PATH, Model_names, MODELS
 
 
 
-RAW_DATA_PATH           = "./data/raw/15 atributos R0-R5.sav"
-DATA_PATH               = './data/processed/data.csv'
-GDS_RESULTS_PATH        = './data/outputs/gds_output.csv'
-GDS_R2_RESULTS_PATH     = './data/outputs/gds_r2_output.csv'
 
 
 
@@ -43,6 +40,7 @@ Y_GDS_R2    =       df_15[['GDS_R2']].values #subdataframe con para gds_r2
 X_TRAIN, X_TEST, Y_TRAIN_GDS, Y_TEST_GDS = train_test_split(X, Y_GDS, test_size=0.4, random_state=0, stratify=Y_GDS)
 X_TRAIN, X_TEST, Y_TRAIN_GDS_R2, Y_TEST_GDS_R2 = train_test_split(X, Y_GDS_R2, test_size=0.4, random_state=0, stratify=Y_GDS_R2)
 
+
 #frec_plot(df_15)
 #entropy_plot(df_15[labels])
 #debido a que la entropia define desorden, ejemplo (el desorden perfecto para 2 clases son frecuencias de 50/50)
@@ -60,13 +58,38 @@ X_TRAIN, X_TEST, Y_TRAIN_GDS_R2, Y_TEST_GDS_R2 = train_test_split(X, Y_GDS_R2, t
 
 #recordar para que etiqueta corresponde cada uno.
 #Debido a que ya creamos los modelos, ya no es necesario correr el random search. ahora extraemos los datos desde los dataframes guardados.
-stacking = stacking(GDS_R2_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS_R2, X_test=X_TEST, Y_test=Y_TEST_GDS_R2)[0]
-boosting = boosting(GDS_R2_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS_R2, X_test=X_TEST, Y_test=Y_TEST_GDS_R2)[0]
-bagging = bagging(GDS_R2_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS_R2, X_test=X_TEST, Y_test=Y_TEST_GDS_R2)[0]
 
-plot_roc_multilabel(
-    [('stacking', stacking),
-     ('boosting', boosting),
-     ('bagging', bagging)]
-    , X_TEST, Y_TEST_GDS_R2)
+#Para gds
+#gds
 
+gds_ensamble_models = {model_name: MODELS[model_name](GDS_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS, X_test=X_TEST, Y_test=Y_TEST_GDS)
+                        for model_name in Model_names}
+gds_r2_ensamble_models = {model_name: MODELS[model_name](GDS_R2_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS_R2, X_test=X_TEST, Y_test=Y_TEST_GDS_R2)
+                            for model_name in Model_names}
+
+
+for name, model in gds_ensamble_models.items():
+    plot_roc_multiclass(
+        model=model, 
+        model_name=name.value, 
+        X_test=X_TEST, y_test=Y_TEST_GDS, 
+        classes_names=GDS_CLASSES, 
+        save_path=SAVE_IMAGES_PATH / "GDS" / f"{name.value}_roc_gds.png"
+        )
+
+for name, model in gds_r2_ensamble_models.items():
+    plot_roc_multiclass(model=model, 
+                        model_name=name.value, 
+                        X_test=X_TEST, 
+                        y_test=Y_TEST_GDS_R2, 
+                        classes_names=GDS_R2_CLASSES, 
+                        save_path=SAVE_IMAGES_PATH / "GDS_R2" / f"{name.value}_roc_gds_r2.png"
+                        )
+
+    confusion_matrix_plot(model=model, 
+                            model_name=name.value, 
+                            X_test=X_TEST,
+                            y_test=Y_TEST_GDS_R2,
+                            classes_names=GDS_R2_CLASSES,
+                            save_path=SAVE_IMAGES_PATH / "GDS_R2" / f"{name.value}_cm_gds_r2.png"
+                            )

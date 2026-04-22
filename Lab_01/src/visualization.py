@@ -2,11 +2,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from eda import entropy_table
-from sklearn.metrics import roc_curve, auc, precision_recall_curve,  average_precision_score
+from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve,  average_precision_score
 import numpy as np
 from sklearn.preprocessing import label_binarize
 
 
+
+#Función que grafica la frecuencia de las diferentes clases para cada uno de las agrupaciones GDS
 def frec_plot(df):
     # Lista de columnas codificadas
     experiments = ['GDS', 'GDS_R1', 'GDS_R2', 'GDS_R3', 'GDS_R4', 'GDS_R5']
@@ -44,6 +46,8 @@ def frec_plot(df):
     plt.show()
 
 
+
+#Función para calcular la entropia de las frecuencias de cada conjunto de etiquetas.
 def entropy_plot(df):
     entropias = entropy_table(df)
 
@@ -56,70 +60,93 @@ def entropy_plot(df):
 
 
 
-def plot_roc_multilabel(models, X_test, y_test):
-    n_labels = y_test.shape[1]
+#Función para graficar la curva roc con su correspondiente area bajo la curva
+def plot_roc_multiclass(model, model_name, X_test, y_test, classes_names, save_path):
+    classes = np.unique(y_test)
+    n_classes = len(classes)
 
-    for name, model in models:
-        plt.figure(figsize=(6,5))
+    y_test_bin = label_binarize(y_test, classes=classes)
+    y_score = model.predict_proba(X_test)
 
-        y_score = model.predict_proba(X_test)
+    fpr = {}
+    tpr = {}
+    roc_auc = {}
 
-        # Caso multilabel típico de sklearn → lista
-        if isinstance(y_score, list):
-            y_score = np.column_stack([s[:, 1] for s in y_score])
+    plt.figure(figsize=(8,6))
 
-        for i in range(n_labels):
-            y_true = y_test[:, i]
-            unique_vals = np.unique(y_true)
+    # ===== OvR curves =====
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], y_score[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
 
-            # 🔹 Caso binario normal
-            if len(unique_vals) == 2:
-                fpr, tpr, _ = roc_curve(y_true, y_score[:, i])
-                roc_auc = auc(fpr, tpr)
-                plt.plot(fpr, tpr, label=f"Label {i} (AUC={roc_auc:.2f})")
+        plt.plot(
+            fpr[i], tpr[i],
+            label=f"Deterioro {classes_names[i]} (AUC = {roc_auc[i]:.2f})"
+        )
 
-            # 🔹 Caso multiclass → One-vs-Rest
-            elif len(unique_vals) > 2:
-                y_bin = label_binarize(y_true, classes=unique_vals)
+    # ===== Macro-average =====
+    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+    mean_tpr = np.zeros_like(all_fpr)
 
-                for c in range(y_bin.shape[1]):
-                    fpr, tpr, _ = roc_curve(y_bin[:, c], y_score[:, i])
-                    roc_auc = auc(fpr, tpr)
-                    plt.plot(fpr, tpr, linestyle='--',
-                            label=f"Label {i} class {unique_vals[c]} (AUC={roc_auc:.2f})")
+    for i in range(n_classes):
+        mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
 
-            else:
-                continue  # caso degenerado
+    mean_tpr /= n_classes
+    macro_auc = auc(all_fpr, mean_tpr)
 
-        plt.plot([0,1], [0,1], 'k--')
-        plt.title(f"ROC - {name}")
-        plt.xlabel("FPR")
-        plt.ylabel("TPR")
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
+    plt.plot(
+        all_fpr, mean_tpr,
+        linestyle="--",
+        linewidth=2,
+        label=f"Macro-average (AUC = {macro_auc:.2f})"
+    )
+
+    # línea aleatoria
+    plt.plot([0, 1], [0, 1], "k--")
+
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ROC Multiclase (OvR + Macro-average) of " + model_name)
+    plt.legend()
+    plt.grid()
+
+    save_path.parent.mkdir(parents=True, exist_ok=True) 
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()
 
 
 
-def plot_pr_multilabel(models, X_test, y_test):
-    n_labels = y_test.shape[1]
+def confusion_matrix_plot(model, model_name, X_test, y_test, classes_names, save_path):
+    labels = sorted(np.unique(y_test))
+    y_pred = model.predict(X_test)
 
-    for name, model in models:
-        plt.figure(figsize=(6,5))
+    cm = confusion_matrix(y_test, y_pred, labels=labels)
 
-        y_score = model.predict_proba(X_test)
+    plt.figure(figsize=(6,5))
+    plt.imshow(cm, interpolation='nearest', cmap='Blues')
+    plt.title(f"Matriz de Confusión - {model_name}")
+    plt.colorbar()
 
-        if isinstance(y_score, list):
-            y_score = np.column_stack([s[:,1] for s in y_score])
+    tick_marks = np.arange(len(labels))
+    plt.xticks(tick_marks, classes_names)
+    plt.yticks(tick_marks, classes_names)
 
-        for i in range(n_labels):
-            precision, recall, _ = precision_recall_curve(y_test[:, i], y_score[:, i])
-            ap = average_precision_score(y_test[:, i], y_score[:, i])
+    thresh = cm.max() / 2
 
-            plt.plot(recall, precision, label=f"Label {i} (AP={ap:.2f})")
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            plt.text(
+                j, i,
+                format(cm[i, j], 'd'),
+                ha="center",
+                va="center",
+                color="white" if cm[i, j] > thresh else "black"
+            )
 
-        plt.title(f"PR - {name}")
-        plt.xlabel("Recall")
-        plt.ylabel("Precision")
-        plt.legend()
-        plt.show()
+    plt.ylabel("Clase real")
+    plt.xlabel("Clase predicha")
+    plt.tight_layout()
+
+    save_path.parent.mkdir(parents=True, exist_ok=True) 
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()

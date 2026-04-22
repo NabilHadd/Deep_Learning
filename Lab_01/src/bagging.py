@@ -56,12 +56,5 @@ def bagging(PATH, X_train, Y_train, X_test, Y_test):
     # 4. Entrenar
     random_search.fit(X_train, Y_train)
 
-    # 5. Evaluar
-    y_pred = random_search.predict(X_test)
 
-    accuracy = accuracy_score(Y_test, y_pred)
-    precision = precision_score(Y_test, y_pred, average='macro', zero_division=0)
-    recall = recall_score(Y_test, y_pred, average='macro', zero_division=0)
-    f1 = f1_score(Y_test, y_pred, average='macro', zero_division=0)
-
-    return random_search.best_estimator_, accuracy, precision, recall, f1
+    return random_search.best_estimator_

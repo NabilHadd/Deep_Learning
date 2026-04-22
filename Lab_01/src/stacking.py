@@ -44,11 +44,5 @@ def stacking(PATH, X_train, Y_train, X_test, Y_test):
 
     stacking_model.fit(X_train, Y_train)
 
-    y_pred = stacking_model.predict(X_test)
-    # Métricas
-    accuracy = accuracy_score(Y_test, y_pred)
-    precision = precision_score(Y_test, y_pred, average='macro', zero_division=0)
-    recall = recall_score(Y_test, y_pred, average='macro', zero_division=0)
-    f1 = f1_score(Y_test, y_pred, average='macro', zero_division=0)
 
-    return stacking_model, accuracy, precision, recall, f1
+    return stacking_model

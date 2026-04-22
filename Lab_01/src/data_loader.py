@@ -1,13 +1,17 @@
-import pandas as pd
-#Podría ser mejor
 
+
+import pandas as pd
+from pathlib import Path
 
 def data_loader(path):
-    ext = path.split('.')[-1]
-    if ext == "sav":
-        df = pd.read_spss(path)
-    else:
-        df = pd.read_csv(path, sep=';')
+    path = Path(path)
+    ext = path.suffix.lower()
 
+    if ext == ".sav":
+        df = pd.read_spss(path)
+    elif ext == ".csv":
+        df = pd.read_csv(path, sep=';')
+    else:
+        raise ValueError(f"Formato no soportado: {ext}")
 
     return df
