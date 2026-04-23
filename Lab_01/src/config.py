@@ -19,9 +19,10 @@ SAVE_IMAGES_PATH    = BASE_PATH / "data/outputs/images"
 
 # ENUM
 class Model_names(Enum):
-    STACKING_NAME = "Stacking_model"
-    BOOSTING_NAME = "Boosting_model"
-    BAGGING_NAME  = "Bagging_model"
+    STACKING_NAME   = "Stacking_model"
+    BOOSTING_NAME   = "Boosting_model"
+    BAGGING_NAME    = "Bagging_model"
+    OWN_NAIVE_NAYES = "Own_naive_Bayes"
 
 # MODELOS
 MODELS = {
