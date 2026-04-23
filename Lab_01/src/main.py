@@ -37,17 +37,15 @@ eda.make_csv(df_15_raw, DATA_PATH)
 #debido a que la entropia define desorden, ejemplo (el desorden perfecto para 2 clases son frecuencias de 50/50)
 #En este contexto la entropia representa balanceo, por lo que a mayor entropria mas balanceadas estan las clases.
 
-"""
+#Leemos los datos procesados
+df_15       =       data_loader(DATA_PATH)
+labels      =       df_15.columns.tolist()[df_15.columns.to_list().index('GDS'):]
+
 #graficamos
 frec_plot(df_15)
 entropy_plot(df_15[labels])
 
-
-#Leemos los datos procesados
-df_15       =       data_loader(DATA_PATH)
-
 #consideramos solo los labels haciendo un split desde el indice de gds en adelante
-labels      =       df_15.columns.tolist()[df_15.columns.to_list().index('GDS'):]
 
 X           =       df_15.drop(columns=labels) #subdataframe con los atributos
 Y_GDS       =       df_15[['GDS']].values #subdataframe con para gds
@@ -56,7 +54,7 @@ Y_GDS_R2    =       df_15[['GDS_R2']].values #subdataframe con para gds_r2
 X_TRAIN, X_TEST, Y_TRAIN_GDS, Y_TEST_GDS = train_test_split(X, Y_GDS, test_size=0.4, random_state=0, stratify=Y_GDS)
 X_TRAIN, X_TEST, Y_TRAIN_GDS_R2, Y_TEST_GDS_R2 = train_test_split(X, Y_GDS_R2, test_size=0.4, random_state=0, stratify=Y_GDS_R2)
 
-"""
+
 
 
 
@@ -81,6 +79,7 @@ eda.make_csv(results_dataframe[0], GDS_R2_RESULTS_PATH, idx=True)
 
 #======================Cuarta parte=========================
 #Se construyen los modelos de ensamble stacking, boosting, y bagging ademas de un naive bayes para gds r2
+#Ademas se grafican todas las curvas roc de los modelos de ensamble, ademas de matrices de confusión para gdsr2
 """
 #Debido a que ya creamos los modelos, ya no es necesario correr el random search. ahora extraemos los datos desde los dataframes guardados.
 gds_ensamble_models = {model_name: MODELS[model_name](GDS_RESULTS_PATH, X_train=X_TRAIN, Y_train=Y_TRAIN_GDS, X_test=X_TEST, Y_test=Y_TEST_GDS)
@@ -94,13 +93,6 @@ gds_r2_ensamble_models = {model_name: MODELS[model_name](GDS_R2_RESULTS_PATH, X_
 #NAIVE BAYES PARA GDS R2
 naive_bayes_model =  train_own_naive_bayes(X_train=X_TRAIN, Y_train=Y_TRAIN_GDS_R2)
 
-"""
-
-
-
-#=============================Quinta parte===========================
-#Se grafican todas las curvas roc de los modelos de ensamble, ademas de matrices de confusión para gdsr2
-"""
 
 #Modelos de ensamble gds (sin matrices de confusión)
 for name, model in gds_ensamble_models.items():
