@@ -51,8 +51,8 @@ X           =       df_15.drop(columns=labels) #subdataframe con los atributos
 Y_GDS       =       df_15[['GDS']].values #subdataframe con para gds
 Y_GDS_R2    =       df_15[['GDS_R2']].values #subdataframe con para gds_r2
 
-X_TRAIN, X_TEST, Y_TRAIN_GDS, Y_TEST_GDS = train_test_split(X, Y_GDS, test_size=0.4, random_state=0, stratify=Y_GDS)
-X_TRAIN, X_TEST, Y_TRAIN_GDS_R2, Y_TEST_GDS_R2 = train_test_split(X, Y_GDS_R2, test_size=0.4, random_state=0, stratify=Y_GDS_R2)
+X_TRAIN, X_TEST, Y_TRAIN_GDS, Y_TEST_GDS = train_test_split(X, Y_GDS, test_size=0.4, random_state=42, stratify=Y_GDS)
+X_TRAIN, X_TEST, Y_TRAIN_GDS_R2, Y_TEST_GDS_R2 = train_test_split(X, Y_GDS_R2, test_size=0.4, random_state=42, stratify=Y_GDS_R2)
 
 
 
