@@ -1,3 +1,4 @@
+from scipy.stats import randint, uniform
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_is_fitted
@@ -6,12 +7,17 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from src.config import RANDOM_SEED
+
+
+
+
+
 #podemos pasarle la funcion de activacion
 #podemos pasarle un dropout
 #podemos pasarle learning rate
 #podemos pasarle el batch size
 #y tambien threshold para la prediccion
-
 
 
 #Se crea nuestra red poco profunda con una sola capa oculta
@@ -54,7 +60,8 @@ class ShallowMultiLabelNet(ClassifierMixin, BaseEstimator):
         epochs=100,
         activation=nn.ReLU,
         batch_size=32,
-        random_state=42,
+        random_state=RANDOM_SEED,
+        weight_decay=0.0001,
         threshold=0.5
     ):
 
@@ -66,6 +73,7 @@ class ShallowMultiLabelNet(ClassifierMixin, BaseEstimator):
         self.batch_size = batch_size
         self.random_state = random_state
         self.threshold = threshold
+        self.weight_decay = weight_decay
         self.rng_ = None
 
     def batch_loader(self, X, Y):
@@ -101,6 +109,11 @@ class ShallowMultiLabelNet(ClassifierMixin, BaseEstimator):
 
 
     def fit(self, X, y):
+        self.input_dim_ = X.shape[1]
+        self.output_dim_ = y.shape[1]
+        self.classes_ = np.arange(self.output_dim_)
+
+        
         if self.random_state is not None:
             torch.manual_seed(self.random_state)
 
@@ -122,7 +135,8 @@ class ShallowMultiLabelNet(ClassifierMixin, BaseEstimator):
 
         optimizer = optim.Adam(
             self.model_.parameters(),
-            lr=self.learning_rate
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay
         )
         criterion = nn.BCEWithLogitsLoss()
         
@@ -133,10 +147,10 @@ class ShallowMultiLabelNet(ClassifierMixin, BaseEstimator):
           loader = self.batch_loader(X, y)
 
           self.train_one_epoch(
-              loader= loader,
-              optimizer= optimizer,
-              criterion= criterion
-          )
+            loader= loader,
+            optimizer= optimizer,
+            criterion= criterion
+           )
 
         return self
 
@@ -165,3 +179,21 @@ class ShallowMultiLabelNet(ClassifierMixin, BaseEstimator):
         probs = self.predict_proba(X)
 
         return (probs >= self.threshold).astype(int)
+
+
+nn_config = {
+    'classifier': ShallowMultiLabelNet(random_state=RANDOM_SEED),
+    'params': {
+        'hidden_dim': randint(16, 64),
+        'epochs': randint(50, 200),
+        'activation': [
+            torch.nn.ReLU,
+            torch.nn.LeakyReLU
+        ],
+        'batch_size': randint(16, 32),
+        'learning_rate': uniform(0.001, 0.01),
+        'dropout': uniform(0.1, 0.5),
+        'threshold': uniform(0.3, 0.7),
+        'weight_decay': uniform(0, 0.0001)
+    }
+}

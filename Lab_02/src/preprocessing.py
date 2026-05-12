@@ -1,5 +1,8 @@
+from scipy.stats import randint
 import numpy as np
-
+from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
 
 def one_hot_encode(target_name, df):
   """One-hot encode the target variable.
@@ -18,3 +21,15 @@ def one_hot_encode(target_name, df):
   Y[np.arange(len(y_encoded)), y_encoded] = 1.0
 
   return Y
+
+
+preprocessor = {
+  'pipeline': Pipeline([
+    ('imputer', SimpleImputer()),
+    ('chi2', SelectKBest(score_func=chi2))
+  ]),
+  'params': {
+  'imputer__strategy': ['most_frequent'],
+  'chi2__k': randint(1, 15)
+  }
+}
