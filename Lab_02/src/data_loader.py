@@ -7,18 +7,14 @@ def sav_to_csv(sav_file_path, csv_file_path):
     Args:
         sav_file_path (str): Ruta del archivo SAV de entrada
         csv_file_path (str): Ruta del archivo CSV de salida
-    
-    Returns:
-        pd.DataFrame: DataFrame con los datos cargados
     """
+
     try:
         # Leer archivo SAV
         df = pd.read_spss(sav_file_path)
         
         # Guardar como CSV
         df.to_csv(csv_file_path, index=False, encoding='utf-8', sep=';')
-        
-        return df
     
     except FileNotFoundError:
         print(f"Error: No se encontró el archivo {sav_file_path}")
