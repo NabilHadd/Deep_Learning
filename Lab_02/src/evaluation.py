@@ -18,4 +18,6 @@ def evaluate_model(df, targets, scores_csv_path):
 
     scores_df = pd.DataFrame(scores_dict)
 
-    make_csv(scores_df, scores_csv_path)
+  #Esto resuelve el error de sobre esrituta???
+  #esta mal que se genere un csv en cada iteración?
+  make_csv(scores_df, scores_csv_path)
