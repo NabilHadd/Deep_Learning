@@ -13,36 +13,41 @@ conda env create -f enviroment.yml
 conda activate lab02_dl
 ```
 
-Ademas, este laboratorio usa **PyTorch** en [src/models.py](src/models.py). Si tu entorno no lo trae instalado por defecto, agrega:
-
-```bash
-pip install torch
-```
-
 ## Estructura del proyecto
 
 ```text
 .
-├── data/
-│   ├── raw/
-│   │   ├── dataset_deterioro.sav
-│   │   └── dataset_deterioro.csv
-│   └── output/
-│       └── scores.csv
-├── src/
-│   ├── __init__.py
-│   ├── config.py
-│   ├── data_loader.py
-│   ├── evaluation.py
-│   ├── models.py
-│   ├── preprocessing.py
-│   ├── scorer_model.py
-│   ├── train_nn.py
-│   └── uncertainly.py
+├── data
+│   ├── output
+│   │   └── scores.csv
+│   └── raw
+│       ├── dataset_deterioro.csv
+│       └── dataset_deterioro.sav
 ├── enviroment.yml
 ├── main.py
-├── README lab 01.md
-└── README.md
+├── README.md
+└── src
+    ├── config.py
+    ├── data_loader.py
+    ├── eda.py
+    ├── evaluation.py
+    ├── __init__.py
+    ├── models.py
+    ├── preprocessing.py
+    ├── __pycache__
+    │   ├── config.cpython-314.pyc
+    │   ├── data_loader.cpython-314.pyc
+    │   ├── evaluation.cpython-314.pyc
+    │   ├── __init__.cpython-314.pyc
+    │   ├── models.cpython-314.pyc
+    │   ├── preprocessing.cpython-314.pyc
+    │   ├── scorer_model.cpython-314.pyc
+    │   └── train_nn.cpython-314.pyc
+    ├── scorer_model.py
+    ├── train_nn.py
+    ├── uncertainly.py
+    └── visualization.py
+
 ```
 
 ## Como se ejecuta
@@ -81,7 +86,7 @@ El scoring se guarda en `data/output/scores.csv`.
 
 Despues de la evaluacion, [main.py](main.py) vuelve a entrenar el modelo con todos los datos usando [src/train_nn.py](src/train_nn.py).
 
-## Enfasis: PyTorch para la red neuronal
+## PyTorch para la red neuronal
 
 La arquitectura neuronal esta en [src/models.py](src/models.py) como `MyNN`, una red poco profunda implementada con `torch.nn.Module`:
 
@@ -98,7 +103,7 @@ Durante entrenamiento se usa:
 
 Esto asegura que el modelo central del laboratorio sea una red neuronal real construida y entrenada en PyTorch.
 
-## Enfasis: integrar la red de torch con scikit-learn
+## Integrar la red de torch con scikit-learn
 
 La clave del laboratorio es que la red de PyTorch no se usa de forma aislada. En [src/models.py](src/models.py), `ShallowMultiLabelNet` hereda de `BaseEstimator` y `ClassifierMixin`, exponiendo interfaz tipo sklearn:
 

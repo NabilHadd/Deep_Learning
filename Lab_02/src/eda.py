@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def missing_values(df):
     df = erase_index(df)
@@ -92,3 +93,49 @@ def entropy_table(df):
     return entropias_df
         
 #Se normalizan las entropias para hacer una comparación mas robusta. Debido a que a un label con mas clases le es mas dificil estar desordenado.
+
+
+def plot_feature_histograms(df, exclude_cols):
+    """Histogramas de distribución por feature."""
+    feature_df = df.drop(columns=[c for c in exclude_cols if c in df.columns])
+    n = len(feature_df.columns)
+    n_cols = 4
+    n_rows = (n + n_cols - 1) // n_cols
+
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 3, n_rows * 2.5))
+    axes = axes.flatten()
+
+    for i, col in enumerate(feature_df.columns):
+        axes[i].hist(feature_df[col].dropna(), bins=10, edgecolor='black')
+        axes[i].set_title(col, fontsize=8)
+
+    for j in range(i + 1, len(axes)):
+        axes[j].set_visible(False)
+
+    plt.suptitle("Distribución de features")
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_correlation_heatmap(df, exclude_cols):
+    """Heatmap de correlación entre features."""
+    feature_df = df.drop(columns=[c for c in exclude_cols if c in df.columns])
+    corr = feature_df.corr()
+    labels = corr.columns.tolist()
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    im = ax.imshow(corr, cmap='coolwarm', vmin=-1, vmax=1)
+    plt.colorbar(im, ax=ax)
+
+    ax.set_xticks(range(len(labels)))
+    ax.set_yticks(range(len(labels)))
+    ax.set_xticklabels(labels, rotation=45, ha='right', fontsize=7)
+    ax.set_yticklabels(labels, fontsize=7)
+
+    for i in range(len(labels)):
+        for j in range(len(labels)):
+            ax.text(j, i, f'{corr.iloc[i, j]:.2f}', ha='center', va='center', fontsize=6)
+
+    plt.title("Correlación entre features")
+    plt.tight_layout()
+    plt.show()

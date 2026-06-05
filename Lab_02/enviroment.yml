@@ -1,4 +1,4 @@
-name: lab_02
+name: lab02_dl
 channels:
   - conda-forge
   - defaults

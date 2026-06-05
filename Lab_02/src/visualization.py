@@ -1,9 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from eda import entropy_table
-from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve,  average_precision_score
-import numpy as np
+from src.eda import entropy_table
+from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, average_precision_score
 from sklearn.preprocessing import label_binarize
 
 
@@ -109,6 +108,59 @@ def plot_roc_multiclass(model, model_name, X_test, y_test, classes_names, save_p
     save_path.parent.mkdir(parents=True, exist_ok=True) 
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
+
+
+
+def plot_roc_curves(y_true, y_score, class_names, gds_name, save_path=None):
+    """
+    Genera curvas ROC micro/macro y por clase para un GDS dado.
+    y_true: array (n_samples, n_classes) con etiquetas reales.
+    y_score: array (n_samples, n_classes) con probabilidades predichas.
+    class_names: lista de strings con el nombre de cada clase.
+    gds_name: string identificador del GDS (para el título).
+    save_path: ruta opcional para guardar la figura.
+    """
+    n_classes = y_true.shape[1]
+    fpr, tpr, roc_auc = {}, {}, {}
+
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_true[:, i], y_score[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    fpr['micro'], tpr['micro'], _ = roc_curve(y_true.ravel(), y_score.ravel())
+    roc_auc['micro'] = auc(fpr['micro'], tpr['micro'])
+
+    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+    mean_tpr = np.zeros_like(all_fpr)
+    for i in range(n_classes):
+        mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+    mean_tpr /= n_classes
+    roc_auc['macro'] = auc(all_fpr, mean_tpr)
+
+    plt.figure(figsize=(10, 7))
+
+    for i in range(n_classes):
+        plt.plot(fpr[i], tpr[i], label=f"{class_names[i]} (AUC={roc_auc[i]:.2f})")
+
+    plt.plot(fpr['micro'], tpr['micro'], linestyle=':', linewidth=2,
+             label=f"Micro-average (AUC={roc_auc['micro']:.2f})")
+    plt.plot(all_fpr, mean_tpr, linestyle='--', linewidth=2,
+             label=f"Macro-average (AUC={roc_auc['macro']:.2f})")
+    plt.plot([0, 1], [0, 1], 'k--')
+
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title(f"Curvas ROC — {gds_name}")
+    plt.legend(loc='lower right')
+    plt.grid(alpha=0.3)
+
+    if save_path is not None:
+        from pathlib import Path
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.show()
 
 
 

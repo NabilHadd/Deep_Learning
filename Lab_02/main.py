@@ -4,23 +4,34 @@ from src.data_loader import sav_to_csv, load_csv
 from src.evaluation import evaluate_model
 from src.train_nn import train_shallow_nn
 from src.preprocessing import one_hot_encode
+from src.eda import missing_values, feauters_labels_count, plot_feature_histograms, plot_correlation_heatmap
+from src.visualization import frec_plot, entropy_plot, plot_roc_curves
 from sklearn.metrics import hamming_loss
 
 
 def main():
-  #agregar algo de EDA por ejemplo la distribución de las clases, correlación entre features, etc.
-  """
-    Se hace un poco de analisis exploratorio de los datos para entender mejor el dataset:
-    - Distribución de las clases para cada target
-    - Correlación entre features
-    A partir de ello se construye una hipotesis del mejor gds
-  """
-
-  """
-    Se convierte el archivo .sav a .csv y se carga el dataframe
-  """
   sav_to_csv(SAV_DATA_PATH, CSV_DATA_PATH)
   df = load_csv(CSV_DATA_PATH)
+
+
+  # --- EDA ---
+  target_keys = list(TARGETS.keys())
+  non_feature_cols = target_keys + ['ID']
+
+  print(f"\n=== Análisis Exploratorio de Datos ===")
+  print(f"Total de muestras: {len(df)}")
+  feauters_labels_count(df)
+  missing_values(df)
+
+  print("\n--- Estadísticas descriptivas de features ---")
+  feature_cols = [c for c in df.columns if c not in non_feature_cols]
+  print(df[feature_cols].describe())
+
+  plot_feature_histograms(df, non_feature_cols)
+  plot_correlation_heatmap(df, non_feature_cols)
+  frec_plot(df)
+  entropy_plot(df)
+  # --- Fin EDA ---
 
 
   """
@@ -41,22 +52,24 @@ def main():
   print(TARGETS[best_gds])
 
 
-
   """
     Se prepara X e Y para entrenar el GDS con los mejores score
     Luego se reentrena un modelo solo para ese GDS y se calcula el hamming loss
-    para ver que tan bien se ajusta el modelo a los datos,
-    luego se puede comparar este resultado con el resultado del csv para ver que tanta varianza existe 
   """
-
   X = df.drop(columns=list(TARGETS.keys()))
-  Y = one_hot_encode(best_gds,df)
+  Y = one_hot_encode(best_gds, df)
 
-  y_pred = train_shallow_nn(X=X, Y=Y).predict(X)
+  final_model = train_shallow_nn(X=X, Y=Y)
+  y_pred = final_model.predict(X)
+  y_score = final_model.predict_proba(X)
   print(f"Hamming Loss for {best_gds}: {hamming_loss(Y, y_pred)}")
-  #luego puedes comparar este resultado con el resultado del csv para ver que tanta varianza existe
-  #Construir las curvas roc correspondientes a cada gds y compararlas entre si
 
+  plot_roc_curves(
+      y_true=Y,
+      y_score=y_score,
+      class_names=TARGETS[best_gds],
+      gds_name=best_gds
+  )
 
 
 main()
