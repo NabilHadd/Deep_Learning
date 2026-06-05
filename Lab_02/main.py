@@ -29,8 +29,7 @@ def main():
 
   plot_feature_histograms(df, non_feature_cols)
   plot_correlation_heatmap(df, non_feature_cols)
-  frec_plot(df)
-  entropy_plot(df)
+  entropy_plot(df, target_keys)
   # --- Fin EDA ---
 
 
@@ -38,7 +37,7 @@ def main():
     Se evalúan los modelos para cada target y se guardan los scores en un csv
     No es necesario ejecutar esto cada vez, ya que los scores se guardan en un csv
   """
-  #evaluate_model(df, list(TARGETS.keys()), SCORES_CSV_PATH)
+  evaluate_model(df, list(TARGETS.keys()), SCORES_CSV_PATH)
 
 
   """
@@ -57,19 +56,21 @@ def main():
     Luego se reentrena un modelo solo para ese GDS y se calcula el hamming loss
   """
   X = df.drop(columns=list(TARGETS.keys()))
-  Y = one_hot_encode(best_gds, df)
 
-  final_model = train_shallow_nn(X=X, Y=Y)
-  y_pred = final_model.predict(X)
-  y_score = final_model.predict_proba(X)
-  print(f"Hamming Loss for {best_gds}: {hamming_loss(Y, y_pred)}")
+  # Curva ROC para cada GDS
+  for gds_name, class_names in TARGETS.items():
+    Y = one_hot_encode(gds_name, df)
+    model = train_shallow_nn(X=X, Y=Y)
+    y_score = model.predict_proba(X)
+    y_pred = model.predict(X)
+    print(f"Hamming Loss for {gds_name}: {hamming_loss(Y, y_pred)}")
+    plot_roc_curves(y_true=Y, y_score=y_score, class_names=class_names, gds_name=gds_name)
 
-  plot_roc_curves(
-      y_true=Y,
-      y_score=y_score,
-      class_names=TARGETS[best_gds],
-      gds_name=best_gds
-  )
+  # Entrenamiento final solo con el mejor GDS
+  Y_best = one_hot_encode(best_gds, df)
+  final_model = train_shallow_nn(X=X, Y=Y_best)
+  y_pred_best = final_model.predict(X)
+  print(f"\nModelo final — Hamming Loss ({best_gds}): {hamming_loss(Y_best, y_pred_best)}")
 
 
 main()

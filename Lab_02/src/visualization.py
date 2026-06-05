@@ -43,72 +43,16 @@ def frec_plot(df):
 
 
 #Función para calcular la entropia de las frecuencias de cada conjunto de etiquetas.
-def entropy_plot(df):
-    entropias = entropy_table(df)
+def entropy_plot(df, target_cols):
+    entropias = entropy_table(df[target_cols])
 
     plt.bar(entropias.index, entropias["entropy"])
-    plt.xlabel("Label")
-    plt.ylabel("Entropia")
-    plt.title("Entropia normalizada de frecuencias por label")
+    plt.xlabel("GDS")
+    plt.ylabel("Entropía normalizada")
+    plt.title("Entropía por agrupación GDS (mayor = clases más balanceadas)")
+    plt.ylim(0, 1)
 
     plt.show()
-
-
-
-#Función para graficar la curva roc con su correspondiente area bajo la curva
-def plot_roc_multiclass(model, model_name, X_test, y_test, classes_names, save_path):
-    classes = np.unique(y_test)
-    n_classes = len(classes)
-
-    y_test_bin = label_binarize(y_test, classes=classes)
-    y_score = model.predict_proba(X_test)
-
-    fpr = {}
-    tpr = {}
-    roc_auc = {}
-
-    plt.figure(figsize=(8,6))
-
-    # ===== OvR curves =====
-    for i in range(n_classes):
-        fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], y_score[:, i])
-        roc_auc[i] = auc(fpr[i], tpr[i])
-
-        plt.plot(
-            fpr[i], tpr[i],
-            label=f"Deterioro {classes_names[i]} (AUC = {roc_auc[i]:.2f})"
-        )
-
-    # ===== Macro-average =====
-    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
-    mean_tpr = np.zeros_like(all_fpr)
-
-    for i in range(n_classes):
-        mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
-
-    mean_tpr /= n_classes
-    macro_auc = auc(all_fpr, mean_tpr)
-
-    plt.plot(
-        all_fpr, mean_tpr,
-        linestyle="--",
-        linewidth=2,
-        label=f"Macro-average (AUC = {macro_auc:.2f})"
-    )
-
-    # línea aleatoria
-    plt.plot([0, 1], [0, 1], "k--")
-
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("ROC Multiclase (OvR + Macro-average) of " + model_name)
-    plt.legend()
-    plt.grid()
-
-    save_path.parent.mkdir(parents=True, exist_ok=True) 
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    plt.close()
-
 
 
 def plot_roc_curves(y_true, y_score, class_names, gds_name, save_path=None):
@@ -143,9 +87,9 @@ def plot_roc_curves(y_true, y_score, class_names, gds_name, save_path=None):
         plt.plot(fpr[i], tpr[i], label=f"{class_names[i]} (AUC={roc_auc[i]:.2f})")
 
     plt.plot(fpr['micro'], tpr['micro'], linestyle=':', linewidth=2,
-             label=f"Micro-average (AUC={roc_auc['micro']:.2f})")
+            label=f"Micro-average (AUC={roc_auc['micro']:.2f})")
     plt.plot(all_fpr, mean_tpr, linestyle='--', linewidth=2,
-             label=f"Macro-average (AUC={roc_auc['macro']:.2f})")
+            label=f"Macro-average (AUC={roc_auc['macro']:.2f})")
     plt.plot([0, 1], [0, 1], 'k--')
 
     plt.xlabel("False Positive Rate")
@@ -164,6 +108,9 @@ def plot_roc_curves(y_true, y_score, class_names, gds_name, save_path=None):
 
 
 
+
+
+#todo
 def confusion_matrix_plot(model, model_name, X_test, y_test, classes_names, save_path):
     labels = sorted(np.unique(y_test))
     y_pred = model.predict(X_test)

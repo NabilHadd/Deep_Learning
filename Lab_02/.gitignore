@@ -10,3 +10,8 @@ dataset/*.csv
 dataset/*.sav
 dataset/*.xlsx
 dataset/*.xls
+
+# Documentos de trabajo interno (no van al repo)
+INSTRUCTIONS.md
+recommendation.md
+metodologia.md

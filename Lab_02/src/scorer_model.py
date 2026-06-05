@@ -9,7 +9,7 @@ from .config import RANDOM_SEED, inner_cv, outer_cv, hamming_scorer
 
 
 
-#Hay que pensar en como aplicar el cross alidation en un esquema anidado.
+#Hay que pensar en como aplicar el cross validation en un esquema anidado.
 def scorer_shallow_nn(X, Y):
 
     
