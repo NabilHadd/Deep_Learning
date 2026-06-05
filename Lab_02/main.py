@@ -5,7 +5,7 @@ from src.evaluation import evaluate_model
 from src.train_nn import train_shallow_nn
 from src.preprocessing import one_hot_encode
 from src.eda import missing_values, feauters_labels_count, plot_feature_histograms, plot_correlation_heatmap
-from src.visualization import frec_plot, entropy_plot, plot_roc_curves
+from src.visualization import entropy_plot, plot_roc_curves, plot_describe_table
 from sklearn.metrics import hamming_loss
 
 
@@ -16,6 +16,7 @@ def main():
 
   # --- EDA ---
   target_keys = list(TARGETS.keys())
+  feature_cols = [c for c in df.columns if c not in non_feature_cols]
   non_feature_cols = target_keys + ['ID']
 
   print(f"\n=== Análisis Exploratorio de Datos ===")
@@ -24,13 +25,14 @@ def main():
   missing_values(df)
 
   print("\n--- Estadísticas descriptivas de features ---")
-  feature_cols = [c for c in df.columns if c not in non_feature_cols]
-  print(df[feature_cols].describe())
 
-  plot_feature_histograms(df, non_feature_cols)
-  plot_correlation_heatmap(df, non_feature_cols)
-  entropy_plot(df, target_keys)
+  describe_df = df[feature_cols].describe()
+  plot_describe_table(describe_df, save_path="./data/output/plots/describe_table.png")
+  plot_feature_histograms(df, non_feature_cols, save_path="./data/output/plots/feature_histograms.png")
+  plot_correlation_heatmap(df, non_feature_cols, save_path="./data/output/plots/correlation_heatmap.png")
+  entropy_plot(df, target_keys, save_path="./data/output/plots/entropy_plot.png")
   # --- Fin EDA ---
+
 
 
   """
@@ -64,7 +66,7 @@ def main():
     y_score = model.predict_proba(X)
     y_pred = model.predict(X)
     print(f"Hamming Loss for {gds_name}: {hamming_loss(Y, y_pred)}")
-    plot_roc_curves(y_true=Y, y_score=y_score, class_names=class_names, gds_name=gds_name)
+    plot_roc_curves(y_true=Y, y_score=y_score, class_names=class_names, gds_name=gds_name, save_path=f"./data/output/plots/roc_{gds_name}.png")
 
   # Entrenamiento final solo con el mejor GDS
   Y_best = one_hot_encode(best_gds, df)

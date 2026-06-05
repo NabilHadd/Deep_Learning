@@ -43,7 +43,7 @@ def frec_plot(df):
 
 
 #Función para calcular la entropia de las frecuencias de cada conjunto de etiquetas.
-def entropy_plot(df, target_cols):
+def entropy_plot(df, target_cols, save_path=None):
     entropias = entropy_table(df[target_cols])
 
     plt.bar(entropias.index, entropias["entropy"])
@@ -52,7 +52,43 @@ def entropy_plot(df, target_cols):
     plt.title("Entropía por agrupación GDS (mayor = clases más balanceadas)")
     plt.ylim(0, 1)
 
-    plt.show()
+    if save_path is not None:
+        from pathlib import Path
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.show()
+
+
+def plot_describe_table(describe_df, save_path=None):
+    """Renderiza la tabla de .describe() como figura."""
+    df_t = describe_df.T.round(3)
+
+    fig, ax = plt.subplots(figsize=(14, len(df_t) * 0.5 + 2))
+    ax.axis('off')
+
+    table = ax.table(
+        cellText=df_t.values,
+        rowLabels=df_t.index,
+        colLabels=df_t.columns,
+        cellLoc='center',
+        loc='center'
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(8)
+    table.auto_set_column_width(col=list(range(len(df_t.columns))))
+
+    plt.title("Estadísticas descriptivas de features", fontsize=12, pad=20)
+    plt.tight_layout()
+
+    if save_path is not None:
+        from pathlib import Path
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.show()
 
 
 def plot_roc_curves(y_true, y_score, class_names, gds_name, save_path=None):

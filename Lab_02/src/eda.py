@@ -95,7 +95,7 @@ def entropy_table(df):
 #Se normalizan las entropias para hacer una comparación mas robusta. Debido a que a un label con mas clases le es mas dificil estar desordenado.
 
 
-def plot_feature_histograms(df, exclude_cols):
+def plot_feature_histograms(df, exclude_cols, save_path=None):
     """Histogramas de distribución por feature."""
     feature_df = df.drop(columns=[c for c in exclude_cols if c in df.columns])
     n = len(feature_df.columns)
@@ -114,10 +114,18 @@ def plot_feature_histograms(df, exclude_cols):
 
     plt.suptitle("Distribución de features")
     plt.tight_layout()
-    plt.show()
+
+    
+    if save_path is not None:
+        from pathlib import Path
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.show()
 
 
-def plot_correlation_heatmap(df, exclude_cols):
+def plot_correlation_heatmap(df, exclude_cols, save_path=None):
     """Heatmap de correlación entre features."""
     feature_df = df.drop(columns=[c for c in exclude_cols if c in df.columns])
     corr = feature_df.corr()
@@ -138,4 +146,11 @@ def plot_correlation_heatmap(df, exclude_cols):
 
     plt.title("Correlación entre features")
     plt.tight_layout()
-    plt.show()
+    
+    if save_path is not None:
+        from pathlib import Path
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    else:
+        plt.show()
