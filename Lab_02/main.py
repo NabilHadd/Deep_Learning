@@ -16,8 +16,8 @@ def main():
 
   # --- EDA ---
   target_keys = list(TARGETS.keys())
-  feature_cols = [c for c in df.columns if c not in non_feature_cols]
   non_feature_cols = target_keys + ['ID']
+  feature_cols = [c for c in df.columns if c not in non_feature_cols]
 
   print(f"\n=== Análisis Exploratorio de Datos ===")
   print(f"Total de muestras: {len(df)}")
