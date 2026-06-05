@@ -1,158 +1,126 @@
-# Laboratorio 02 - Redes neuronales poco profundas
+# Laboratorio 02 — Redes Neuronales Poco Profundas
 
-Este repositorio contiene el codigo del Laboratorio 02 de Deep Learning. El objetivo es entrenar y evaluar un modelo de clasificacion multietiqueta para deterioro cognitivo, donde la red neuronal fue construida con **PyTorch** y luego integrada como clasificador compatible con **scikit-learn** para aprovechar sus herramientas de experimentacion y validacion.
+Clasificación multilabel de deterioro cognitivo usando una red neuronal poco profunda construida en **PyTorch** e integrada con **scikit-learn**.
 
-La orquestacion principal vive en [main.py](main.py). El flujo convierte datos desde formato `.sav`, prepara atributos, ejecuta validacion cruzada anidada para evaluar generalizacion y finalmente entrena el modelo con busqueda de hiperparametros.
+---
+
+## ¿Qué hace este proyecto?
+
+Dado un dataset de pacientes que respondieron preguntas de orientación cognitiva (¿qué día es?, ¿en qué país estás?, etc.), el objetivo es predecir el nivel de deterioro cognitivo según 6 codificaciones distintas llamadas GDS:
+
+| Variable | Clases |
+|---|---|
+| `GDS` | Sin_deterioro, muy_leve, leve, moderado, moderado_alto, severo, muy_severo |
+| `GDS_R1` | leve, moderado, muy_severo |
+| `GDS_R2` | muy_leve, leve, severo |
+| `GDS_R3` | muy_leve, severo |
+| `GDS_R4` | sin_deterioro, moderado_alto, muy_severo |
+| `GDS_R5` | sin_deterioro, moderado, muy_severo |
+
+El flujo completo determina cuál de los 6 GDS es más predecible, entrena el modelo final para ese GDS y genera curvas ROC para comparar todos.
+
+---
 
 ## Requisitos
 
-El proyecto usa **Conda**. Las dependencias base estan en [enviroment.yml](enviroment.yml).
-
 ```bash
 conda env create -f enviroment.yml
-conda activate lab02_dl
+conda activate lab_02
 ```
 
-## Estructura del proyecto
-
-```text
-.
-├── data
-│   ├── output
-│   │   └── scores.csv
-│   └── raw
-│       ├── dataset_deterioro.csv
-│       └── dataset_deterioro.sav
-├── enviroment.yml
-├── main.py
-├── README.md
-└── src
-    ├── config.py
-    ├── data_loader.py
-    ├── eda.py
-    ├── evaluation.py
-    ├── __init__.py
-    ├── models.py
-    ├── preprocessing.py
-    ├── __pycache__
-    │   ├── config.cpython-314.pyc
-    │   ├── data_loader.cpython-314.pyc
-    │   ├── evaluation.cpython-314.pyc
-    │   ├── __init__.cpython-314.pyc
-    │   ├── models.cpython-314.pyc
-    │   ├── preprocessing.cpython-314.pyc
-    │   ├── scorer_model.cpython-314.pyc
-    │   └── train_nn.cpython-314.pyc
-    ├── scorer_model.py
-    ├── train_nn.py
-    ├── uncertainly.py
-    └── visualization.py
-
-```
-
-## Como se ejecuta
-
-Desde la raiz del proyecto:
+## Cómo ejecutar
 
 ```bash
 python main.py
 ```
 
-## Flujo principal en `main.py`
+Siempre desde la raíz del repositorio.
 
-La ejecucion en [main.py](main.py) sigue este orden:
+---
 
-### 1. Conversion y carga de datos
+## Estructura del proyecto
 
-En [src/data_loader.py](src/data_loader.py):
+```
+.
+├── data/
+│   ├── raw/
+│   │   ├── dataset_deterioro.sav     # Dataset original (SPSS)
+│   │   └── dataset_deterioro.csv     # Generado automáticamente
+│   └── output/
+│       └── scores.csv                # Resultados de la evaluación por GDS
+├── src/
+│   ├── config.py          # Semilla, targets, rutas, configuración de CV
+│   ├── data_loader.py     # Conversión SAV→CSV y carga del DataFrame
+│   ├── eda.py             # Funciones de análisis exploratorio
+│   ├── evaluation.py      # Evaluación con CV anidada para todos los GDS
+│   ├── models.py          # Red neuronal (PyTorch) + wrapper sklearn
+│   ├── preprocessing.py   # Imputación + selección de features
+│   ├── scorer_model.py    # CV anidada: inner RandomizedSearchCV + outer cross_val_score
+│   ├── train_nn.py        # Entrenamiento final con RandomizedSearchCV
+│   └── visualization.py  # Gráficos: histogramas, heatmap, entropía, ROC
+└── main.py                # Punto de entrada
+```
 
-- `sav_to_csv()` convierte `data/raw/dataset_deterioro.sav` a CSV.
-- `load_csv()` carga el CSV para el resto del pipeline.
+---
 
-### 2. Evaluacion con validacion cruzada anidada
+## Flujo de ejecución
 
-En [src/evaluation.py](src/evaluation.py) se llama `evaluate_model(...)` para evaluar los targets:
+### 1. Carga de datos
+Convierte el archivo `.sav` a CSV y lo carga en un DataFrame.
 
-- `GDS`
-- `GDS_R1`
-- `GDS_R2`
-- `GDS_R3`
-- `GDS_R4`
-- `GDS_R5`
+### 2. EDA
+Antes de entrenar, se realiza un análisis exploratorio:
+- **Histogramas de features:** muestra la distribución de respuestas por pregunta. Una feature apilada en un solo valor tiene poca utilidad predictiva.
+- **Heatmap de correlación:** detecta features redundantes. Rojo intenso = alta correlación = información repetida.
+- **Entropía por GDS:** mide qué tan balanceadas están las clases en cada variable objetivo. Mayor entropía = clases más equilibradas = mejor para entrenar.
 
-El scoring se guarda en `data/output/scores.csv`.
+### 3. Evaluación con validación cruzada anidada
+Se evalúan los 6 GDS usando validación cruzada anidada para obtener estimaciones de rendimiento **no sesgadas**:
 
-### 3. Entrenamiento final
+- **Inner CV** (3 folds, 10 iteraciones): busca los mejores hiperparámetros de la red y el preprocesador.
+- **Outer CV** (5 folds): evalúa qué tan bien generaliza el proceso completo a datos no vistos.
 
-Despues de la evaluacion, [main.py](main.py) vuelve a entrenar el modelo con todos los datos usando [src/train_nn.py](src/train_nn.py).
+Resultado: `data/output/scores.csv` con 5 scores de Hamming Loss por cada GDS.
 
-## PyTorch para la red neuronal
+> Esta etapa es costosa computacionalmente. Si `scores.csv` ya existe, se puede comentar `evaluate_model(...)` en `main.py` para reutilizarlo.
 
-La arquitectura neuronal esta en [src/models.py](src/models.py) como `MyNN`, una red poco profunda implementada con `torch.nn.Module`:
+El GDS con **menor Hamming Loss promedio** es el más predecible.
 
-- capa lineal de entrada (`nn.Linear`),
-- activacion configurable (`ReLU` o `LeakyReLU`),
-- `Dropout` para regularizacion,
-- capa de salida lineal para logits.
+### 4. Curvas ROC para los 6 GDS
+Se entrena un modelo por cada GDS con todos los datos y se generan curvas ROC (por clase, micro-average y macro-average). El **macro-average** es la métrica más relevante dado el desbalance de clases.
 
-Durante entrenamiento se usa:
+### 5. Entrenamiento final
+Se entrena el modelo definitivo usando todos los datos con el mejor GDS encontrado en el paso 3.
 
-- `BCEWithLogitsLoss` para el problema multietiqueta,
-- optimizador `Adam`,
-- mini-batches y multiples epocas configurables.
+---
 
-Esto asegura que el modelo central del laboratorio sea una red neuronal real construida y entrenada en PyTorch.
+## Arquitectura de la red neuronal
 
-## Integrar la red de torch con scikit-learn
+```
+Input (n_features)
+      ↓
+   Linear
+      ↓
+ ReLU / LeakyReLU
+      ↓
+   Dropout
+      ↓
+   Linear
+      ↓
+Output (n_clases del GDS)
+```
 
-La clave del laboratorio es que la red de PyTorch no se usa de forma aislada. En [src/models.py](src/models.py), `ShallowMultiLabelNet` hereda de `BaseEstimator` y `ClassifierMixin`, exponiendo interfaz tipo sklearn:
+- Pérdida: `BCEWithLogitsLoss` (multilabel)
+- Optimizador: `Adam`
+- Hiperparámetros tuneables: `hidden_dim`, `dropout`, `learning_rate`, `epochs`, `batch_size`, `activation`, `weight_decay`, `threshold`
 
-- `fit(X, y)`
-- `predict_proba(X)`
-- `predict(X)`
+La red está envuelta en `ShallowMultiLabelNet` (hereda de `BaseEstimator` y `ClassifierMixin`) para ser compatible con pipelines y búsquedas de hiperparámetros de sklearn.
 
-Gracias a eso, se puede usar todo el ecosistema de scikit-learn:
+---
 
-- `Pipeline` de preprocesamiento + clasificador ([src/preprocessing.py](src/preprocessing.py), [src/train_nn.py](src/train_nn.py));
-- `RandomizedSearchCV` para sintonizar hiperparametros de preprocessing y red en una sola busqueda ([src/train_nn.py](src/train_nn.py));
-- `cross_val_score` con esquema anidado (`inner_cv` + `outer_cv`) para medir generalizacion de forma robusta ([src/scorer_model.py](src/scorer_model.py), [src/config.py](src/config.py)).
+## Salidas
 
-En otras palabras: **la red la construye torch, pero la estrategia experimental y de validacion se apalanca en sklearn**.
-
-## Preprocesamiento y targets
-
-El preprocesamiento en [src/preprocessing.py](src/preprocessing.py) incluye:
-
-- imputacion de faltantes con `SimpleImputer`;
-- seleccion de atributos con `SelectKBest(chi2)`.
-
-Para las salidas, `one_hot_encode(...)` transforma cada target a formato multietiqueta compatible con la funcion de perdida usada en PyTorch.
-
-## Configuracion central
-
-En [src/config.py](src/config.py) se concentran:
-
-- semilla aleatoria (`RANDOM_SEED`),
-- estrategia de scoring (`hamming_loss`),
-- particiones de validacion cruzada:
-	- `inner_cv`: busqueda de hiperparametros,
-	- `outer_cv`: evaluacion externa.
-
-Esto permite mantener consistencia y reproducibilidad en todo el laboratorio.
-
-## Salidas esperadas
-
-Dependiendo de la ejecucion, se generan o actualizan:
-
-- `data/raw/dataset_deterioro.csv` (conversion desde SAV),
-- `data/output/scores.csv` (resultados por fold y por target).
-
-`scores.csv` resume el desempeno del pipeline completo (preprocesamiento + red en torch envuelta en sklearn) para cada variable objetivo.
-
-## Notas de uso
-
-- Ejecutar siempre desde la raiz del repositorio.
-- Verificar que `torch` este disponible en el entorno antes de correr `main.py`.
-- El tiempo de ejecucion puede ser alto por la validacion cruzada anidada y la busqueda de hiperparametros.
-- Si ya existe `scores.csv`, puedes reutilizarlo para analisis sin volver a correr toda la evaluacion.
-
+| Archivo | Descripción |
+|---|---|
+| `data/raw/dataset_deterioro.csv` | Dataset convertido desde SAV |
+| `data/output/scores.csv` | Hamming Loss por fold y por GDS (CV anidada) |
