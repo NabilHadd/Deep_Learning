@@ -4,6 +4,7 @@ __pycache__/
 .mypy_cache/
 .venv/
 venv/
+informe/
 
 # Los datos pueden contener informacion sensible o ser pesados.
 dataset/*.csv
