@@ -216,6 +216,13 @@ def build_experiment_catalog(config: AppConfig) -> dict[str, ExperimentSpec]:
             lambda_age=config.lambda_age, learning_rate=config.learning_rate,
             use_raw_data=True,
         ),
+        ExperimentSpec(
+            "E6", "CNN alineacion automatica", "resnet_aligned_base", "ablacion",
+            "ResNet18 fine-tuning sobre raw+FaceAligner", True, "resnet_finetuning",
+            use_augmentation=False, dropout=0.4,
+            lambda_age=config.lambda_age, learning_rate=config.learning_rate,
+            unfreeze_blocks=1, use_raw_data=True,
+        ),
     ]
     return {spec.name: spec for spec in specs}
 
