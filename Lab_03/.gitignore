@@ -9,7 +9,7 @@ venv/
 informe/
 
 # Los datos pueden contener informacion sensible o ser pesados.
-data_wild/
+/data_wild/
 
 # Checkpoints de modelos (pesados, reproducibles relanzando experimentos).
 # Para la app Streamlit, copiar manualmente el checkpoint deseado.
