@@ -125,7 +125,18 @@ class MultiTaskEvaluator:
         self.device = device
 
     @torch.inference_mode()
-    def evaluate(self, model: nn.Module, loader: DataLoader) -> EvaluationResult:
+    def evaluate(
+        self,
+        model: nn.Module,
+        loader: DataLoader,
+        age_scale: float = 1.0,
+    ) -> EvaluationResult:
+        """Evaluate the model and return metrics.
+
+        age_scale: multiply age targets and predictions by this factor before
+            computing metrics. Set to 100.0 when the model was trained with
+            normalized age targets (age / 100) to report MAE in years.
+        """
         model.eval()
         gender_targets: list[torch.Tensor] = []
         gender_predictions: list[torch.Tensor] = []
@@ -145,9 +156,12 @@ class MultiTaskEvaluator:
         if not gender_targets:
             raise RuntimeError("El DataLoader de evaluacion no contiene muestras.")
 
+        all_age_targets = torch.cat(age_targets) * age_scale
+        all_age_predictions = torch.cat(age_predictions) * age_scale
+
         return MultiTaskMetrics.calculate(
             gender_targets=torch.cat(gender_targets),
             gender_predictions=torch.cat(gender_predictions),
-            age_targets=torch.cat(age_targets),
-            age_predictions=torch.cat(age_predictions),
+            age_targets=all_age_targets,
+            age_predictions=all_age_predictions,
         )

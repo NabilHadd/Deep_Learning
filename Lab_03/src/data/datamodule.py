@@ -19,9 +19,15 @@ class UTKFaceDataModule:
 
     IMAGE_PATTERNS = ("*.jpg", "*.jpeg", "*.png")
 
-    def __init__(self, config: AppConfig, use_augmentation: bool = True) -> None:
+    def __init__(
+        self,
+        config: AppConfig,
+        use_augmentation: bool = True,
+        normalize_age: bool = False,
+    ) -> None:
         self.config = config
         self.use_augmentation = use_augmentation
+        self.normalize_age = normalize_age
         self.parser = UTKFaceFilenameParser()
         self.train_dataset: UTKFaceDataset | None = None
         self.val_dataset: UTKFaceDataset | None = None
@@ -41,9 +47,15 @@ class UTKFaceDataModule:
 
         # Separate datasets prevent random training transforms from leaking into
         # validation and test sets.
-        self.train_dataset = UTKFaceDataset(train_records, transform=train_transform)
-        self.val_dataset = UTKFaceDataset(val_records, transform=eval_transform)
-        self.test_dataset = UTKFaceDataset(test_records, transform=eval_transform)
+        self.train_dataset = UTKFaceDataset(
+            train_records, transform=train_transform, normalize_age=self.normalize_age
+        )
+        self.val_dataset = UTKFaceDataset(
+            val_records, transform=eval_transform, normalize_age=self.normalize_age
+        )
+        self.test_dataset = UTKFaceDataset(
+            test_records, transform=eval_transform, normalize_age=self.normalize_age
+        )
         self._save_split_manifest(train_records, val_records, test_records)
 
     def train_dataloader(self) -> DataLoader:

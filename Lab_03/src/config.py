@@ -41,6 +41,7 @@ class AppConfig:
     dataset_dir: Path
     artifacts_dir: Path
     cnn_checkpoint: Path
+    utkface_raw_dir: Path | None = None
     seed: int = 42
     image_size: int = 224
     batch_size: int = 32
@@ -93,11 +94,20 @@ class AppConfig:
         if not checkpoint.is_absolute():
             checkpoint = project_root / checkpoint
 
+        raw_dir_str = os.getenv("UTKFACE_RAW_DIR")
+        utkface_raw_dir: Path | None = None
+        if raw_dir_str:
+            raw_path = Path(raw_dir_str).expanduser()
+            if not raw_path.is_absolute():
+                raw_path = project_root / raw_path
+            utkface_raw_dir = raw_path.resolve()
+
         config = cls(
             project_root=project_root,
             dataset_dir=dataset_dir.resolve(),
             artifacts_dir=artifacts_dir.resolve(),
             cnn_checkpoint=checkpoint.resolve(),
+            utkface_raw_dir=utkface_raw_dir,
             seed=_as_int("SEED", 42),
             image_size=_as_int("IMAGE_SIZE", 224),
             batch_size=_as_int("BATCH_SIZE", 32),

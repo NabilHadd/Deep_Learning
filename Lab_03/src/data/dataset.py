@@ -18,9 +18,11 @@ class UTKFaceDataset(Dataset[tuple[torch.Tensor, torch.Tensor, torch.Tensor]]):
         self,
         records: Sequence[UTKFaceRecord],
         transform: Callable | None = None,
+        normalize_age: bool = False,
     ) -> None:
         self.records = list(records)
         self.transform = transform
+        self.normalize_age = normalize_age
 
     def __len__(self) -> int:
         return len(self.records)
@@ -37,5 +39,6 @@ class UTKFaceDataset(Dataset[tuple[torch.Tensor, torch.Tensor, torch.Tensor]]):
             raise TypeError("La transformacion debe convertir la imagen a torch.Tensor.")
 
         gender = torch.tensor(record.gender, dtype=torch.long)
-        age = torch.tensor(record.age, dtype=torch.float32)
+        age_value = record.age / 100.0 if self.normalize_age else record.age
+        age = torch.tensor(age_value, dtype=torch.float32)
         return image, gender, age

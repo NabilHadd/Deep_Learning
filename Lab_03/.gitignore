@@ -15,7 +15,15 @@ dataset/*.sav
 dataset/*.xlsx
 dataset/*.xls
 
+# Datos locales / raw (pueden ser pesados)
+data/
+
 # Documentos de trabajo interno (no van al repo)
 INSTRUCTIONS.md
 recommendation.md
 metodologia.md
+CONTEXTO.md
+REPORTE_CODIGO.md
+REPORTE_DECISIONES.md
+ablaciones.md
+Notas.md

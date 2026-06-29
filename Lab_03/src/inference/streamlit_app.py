@@ -5,13 +5,13 @@ from __future__ import annotations
 from PIL import Image
 
 from src.config import AppConfig
-from src.inference.face_detector import FaceDetector
+from src.data.face_aligner import FaceAligner
 from src.inference.predictor import CNNPredictor
 from src.utils import resolve_device
 
 
 def run_app() -> None:
-    """Render the upload/camera, face detection and prediction workflow."""
+    """Render the upload/camera, face alignment and prediction workflow."""
 
     import streamlit as st
 
@@ -22,8 +22,9 @@ def run_app() -> None:
     st.title("Clasificacion de genero y regresion de edad")
     st.write(
         "Ejemplo educativo con una CNN multitarea entrenada en UTKFace. "
-        "La aplicacion detecta la cara mas grande y aplica el mismo "
-        "preprocesamiento usado durante la evaluacion."
+        "La aplicacion detecta y alinea automaticamente la cara mas grande, "
+        "aplicando el mismo preprocesamiento utilizado durante el entrenamiento "
+        "del experimento E6 (alineacion automatica)."
     )
 
     config = AppConfig.from_env()
@@ -44,22 +45,16 @@ def run_app() -> None:
         return
 
     image = Image.open(source_file).convert("RGB")
-    detector = FaceDetector()
-    detection = detector.detect_largest(image)
+
+    aligner = FaceAligner()
+    aligned_image, face_found = aligner.align_and_crop(image)
 
     left_column, right_column = st.columns(2)
     with left_column:
         st.subheader("Imagen de entrada")
-        if detection is None:
-            st.image(image, use_container_width=True)
-        else:
-            st.image(
-                detector.draw_box(image, detection),
-                caption="Rostro seleccionado",
-                use_container_width=True,
-            )
+        st.image(image, use_container_width=True)
 
-    if detection is None:
+    if not face_found:
         st.warning(
             "No se detecto un rostro frontal. Prueba una imagen con mejor "
             "iluminacion y una cara mas visible."
@@ -67,15 +62,15 @@ def run_app() -> None:
         return
 
     with right_column:
-        st.subheader("Rostro recortado")
-        st.image(detection.crop, use_container_width=True)
+        st.subheader("Rostro alineado y recortado")
+        st.image(aligned_image, use_container_width=True)
 
     if not st.button("Ejecutar modelo", type="primary"):
         return
 
     try:
         predictor = CNNPredictor.from_checkpoint(config.cnn_checkpoint, device)
-        prediction = predictor.predict(detection.crop)
+        prediction = predictor.predict(aligned_image)
     except (FileNotFoundError, RuntimeError, ValueError) as error:
         st.error(str(error))
         return
