@@ -83,7 +83,3 @@ def run_app() -> None:
         "Confianza de genero",
         f"{prediction.gender_confidence * 100:.1f}%",
     )
-    st.caption(
-        "Estas salidas reflejan las etiquetas binarias y sesgos del dataset "
-        "UTKFace; no deben interpretarse como identidad de genero."
-    )
