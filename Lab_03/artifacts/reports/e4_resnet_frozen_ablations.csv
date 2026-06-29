@@ -1,5 +1,5 @@
 strategy_id,strategy_name,experiment_name,variant,changed_component,status,gender_accuracy,gender_precision,gender_recall,gender_f1,age_mae,age_rmse,age_r2,samples,trainable_parameters,training_seconds,checkpoint,message
-E4,ResNet18 congelada,resnet_frozen_base,base,ninguno,NO_IMPLEMENTADO,,,,,,,,,,,,El experimento debe ser completado por los alumnos.
-E4,ResNet18 congelada,resnet_frozen_no_augmentation,ablacion,sin aumentacion,NO_IMPLEMENTADO,,,,,,,,,,,,El experimento debe ser completado por los alumnos.
-E4,ResNet18 congelada,resnet_frozen_lambda_low,ablacion,lambda_age=0.001,NO_IMPLEMENTADO,,,,,,,,,,,,El experimento debe ser completado por los alumnos.
-E4,ResNet18 congelada,resnet_frozen_lambda_high,ablacion,lambda_age=0.1,NO_IMPLEMENTADO,,,,,,,,,,,,El experimento debe ser completado por los alumnos.
+E4,ResNet18 congelada,resnet_frozen_base,base,ninguno,NO_EJECUTADO,,,,,,,,,,,,"Implementado, pero no fue seleccionado en esta ejecucion."
+E4,ResNet18 congelada,resnet_frozen_no_augmentation,ablacion,sin aumentacion,NO_EJECUTADO,,,,,,,,,,,,"Implementado, pero no fue seleccionado en esta ejecucion."
+E4,ResNet18 congelada,resnet_frozen_lambda_low,ablacion,lambda_age=0.001,NO_EJECUTADO,,,,,,,,,,,,"Implementado, pero no fue seleccionado en esta ejecucion."
+E4,ResNet18 congelada,resnet_frozen_lambda_high,ablacion,lambda_age=0.1,NO_EJECUTADO,,,,,,,,,,,,"Implementado, pero no fue seleccionado en esta ejecucion."

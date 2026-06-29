@@ -1,4 +1,3 @@
 strategy_id,strategy_name,experiment_name,variant,changed_component,status,gender_accuracy,gender_precision,gender_recall,gender_f1,age_mae,age_rmse,age_r2,samples,trainable_parameters,training_seconds,checkpoint,message
-E1,Baseline clasico,classical_base,base,ninguno,NO_IMPLEMENTADO,,,,,,,,,,,,El experimento debe ser completado por los alumnos.
-E1,Baseline clasico,classical_pca_50,ablacion,PCA=50 componentes,NO_IMPLEMENTADO,,,,,,,,,,,,El experimento debe ser completado por los alumnos.
-E1,Baseline clasico,classical_pca_200,ablacion,PCA=200 componentes,NO_IMPLEMENTADO,,,,,,,,,,,,El experimento debe ser completado por los alumnos.
+E1,Baseline clasico,classical_base,base,ninguno,NO_EJECUTADO,,,,,,,,,,,,"Implementado, pero no fue seleccionado en esta ejecucion."
+E1,Baseline clasico,classical_pca_low,ablacion,PCA=50 componentes (informacion insuficiente),NO_EJECUTADO,,,,,,,,,,,,"Implementado, pero no fue seleccionado en esta ejecucion."
