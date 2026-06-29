@@ -182,7 +182,7 @@ def build_experiment_catalog(config: AppConfig) -> dict[str, ExperimentSpec]:
             "layer4 descongelado", True, "resnet_finetuning",
             use_augmentation=True, dropout=0.4,
             lambda_age=config.lambda_age, learning_rate=config.learning_rate,
-            unfreeze_blocks=1,
+            unfreeze_blocks=1, cross_eval_with_raw=True,
         ),
         ExperimentSpec(
             "E5", "ResNet18 fine-tuning", "resnet_finetuning_unfreeze_more", "ablacion",
@@ -322,6 +322,7 @@ class ExperimentRunner:
                     "model_kwargs": model_kwargs,
                     "image_size": self.config.image_size,
                     "lambda_age": spec.lambda_age,
+                    "normalize_age": spec.normalize_age,
                 },
             )
             history, training_seconds = trainer.fit(
