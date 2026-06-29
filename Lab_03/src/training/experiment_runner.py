@@ -286,35 +286,43 @@ class ExperimentRunner:
         model, model_kwargs = self._build_model(spec)
         model = model.to(self.device)
 
-        optimizer = optim.Adam(
-            filter(lambda p: p.requires_grad, model.parameters()),
-            lr=spec.learning_rate,
-            weight_decay=self.config.weight_decay,
-        )
-        loss_function = MultiTaskLoss(lambda_age=spec.lambda_age)
         checkpoint_path = self.config.checkpoints_dir / spec.name / "best_model.pt"
+        history: list[dict] | None = None
+        training_seconds = 0.0
 
-        trainer = MultiTaskTrainer(
-            model=model,
-            optimizer=optimizer,
-            loss_function=loss_function,
-            device=self.device,
-            checkpoint_path=checkpoint_path,
-            checkpoint_metadata={
-                "experiment_name": spec.name,
-                "strategy_id": spec.strategy_id,
-                "model_name": spec.model_kind,
-                "model_kwargs": model_kwargs,
-                "image_size": self.config.image_size,
-                "lambda_age": spec.lambda_age,
-            },
-        )
-        history, training_seconds = trainer.fit(
-            data_module.train_dataloader(),
-            data_module.val_dataloader(),
-            epochs=self.config.epochs,
-        )
-        trainer.load_best_checkpoint()
+        if checkpoint_path.exists():
+            print(f"  Checkpoint encontrado, omitiendo entrenamiento.")
+            saved = torch.load(checkpoint_path, map_location=self.device, weights_only=True)
+            model.load_state_dict(saved["model_state_dict"])
+        else:
+            optimizer = optim.Adam(
+                filter(lambda p: p.requires_grad, model.parameters()),
+                lr=spec.learning_rate,
+                weight_decay=self.config.weight_decay,
+            )
+            loss_function = MultiTaskLoss(lambda_age=spec.lambda_age)
+
+            trainer = MultiTaskTrainer(
+                model=model,
+                optimizer=optimizer,
+                loss_function=loss_function,
+                device=self.device,
+                checkpoint_path=checkpoint_path,
+                checkpoint_metadata={
+                    "experiment_name": spec.name,
+                    "strategy_id": spec.strategy_id,
+                    "model_name": spec.model_kind,
+                    "model_kwargs": model_kwargs,
+                    "image_size": self.config.image_size,
+                    "lambda_age": spec.lambda_age,
+                },
+            )
+            history, training_seconds = trainer.fit(
+                data_module.train_dataloader(),
+                data_module.val_dataloader(),
+                epochs=self.config.epochs,
+            )
+            trainer.load_best_checkpoint()
 
         age_scale = 100.0 if spec.normalize_age else 1.0
         evaluator = MultiTaskEvaluator(self.device)
@@ -322,7 +330,8 @@ class ExperimentRunner:
             model, data_module.test_dataloader(), age_scale=age_scale
         )
 
-        self.plotter.plot_training_history(history, spec.name)
+        if history is not None:
+            self.plotter.plot_training_history(history, spec.name)
         self.plotter.plot_confusion_matrix(evaluation, spec.name)
         self.plotter.plot_age_predictions(evaluation, spec.name)
 
