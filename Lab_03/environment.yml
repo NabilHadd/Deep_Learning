@@ -1,4 +1,4 @@
-name: lab03-dl-2026-01
+name: lab_03
 
 channels:
   - conda-forge

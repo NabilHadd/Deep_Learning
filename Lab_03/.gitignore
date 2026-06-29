@@ -8,6 +8,7 @@ __pycache__/
 venv/
 informe/
 
+data/
 # Los datos pueden contener informacion sensible o ser pesados.
 dataset/*.csv
 dataset/*.sav
