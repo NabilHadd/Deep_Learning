@@ -8,15 +8,12 @@ __pycache__/
 venv/
 informe/
 
-data/
 # Los datos pueden contener informacion sensible o ser pesados.
+data/
 dataset/*.csv
 dataset/*.sav
 dataset/*.xlsx
 dataset/*.xls
-
-# Datos locales / raw (pueden ser pesados)
-data/
 
 # Documentos de trabajo interno (no van al repo)
 INSTRUCTIONS.md
