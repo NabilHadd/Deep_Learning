@@ -90,5 +90,5 @@ class FaceAligner:
         pivot_y = (left_cy + right_cy) // 2
 
         h, w = face_rgb.shape[:2]
-        rotation_matrix = cv2.getRotationMatrix2D((pivot_x, pivot_y), angle, 1.0)
+        rotation_matrix = cv2.getRotationMatrix2D((float(pivot_x), float(pivot_y)), angle, 1.0)
         return cv2.warpAffine(face_rgb, rotation_matrix, (w, h), flags=cv2.INTER_LINEAR)
