@@ -10,6 +10,10 @@ informe/
 
 # Los datos pueden contener informacion sensible o ser pesados.
 data/
+
+# Checkpoints de modelos (pesados, reproducibles relanzando experimentos).
+# Para la app Streamlit, copiar manualmente el checkpoint deseado.
+artifacts/checkpoints/
 dataset/*.csv
 dataset/*.sav
 dataset/*.xlsx
