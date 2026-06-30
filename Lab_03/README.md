@@ -5,10 +5,6 @@
 **Autores:** Nabil Haddad Pomar · Tomás Méndez Díaz  
 **Repositorio:** https://github.com/NabilHadd/Deep_Learning/tree/master/Lab_03
 
-> Las etiquetas de género de UTKFace describen la anotación del dataset, no la identidad de género de una persona. El modelo puede reproducir sesgos y no debe usarse para tomar decisiones sobre personas reales.
-
----
-
 ## Descripción
 
 Sistema de aprendizaje multitarea para predecir simultáneamente **género** (clasificación binaria) y **edad** (regresión) a partir de imágenes faciales del dataset [UTKFace](https://susanqq.github.io/UTKFace/). Se comparan seis estrategias de complejidad creciente y se cuantifica el *domain gap* entre datos pre-alineados y un pipeline de producción basado en cascadas de Haar.
