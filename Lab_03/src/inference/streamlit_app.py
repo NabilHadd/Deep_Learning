@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from PIL import Image
 
-from src.config import AppConfig
 from src.data.face_aligner import FaceAligner
 from src.inference.predictor import CNNPredictor
 from src.utils import resolve_device
+
+_CHECKPOINT = Path(__file__).resolve().parents[2] / "artifacts/checkpoints/resnet_aligned_base/best_model.pt"
+_DEVICE = "cpu"
 
 
 def run_app() -> None:
@@ -27,10 +31,9 @@ def run_app() -> None:
         "del experimento E6 (alineacion automatica)."
     )
 
-    config = AppConfig.from_env()
-    device = resolve_device(config.device)
+    device = resolve_device(_DEVICE)
     st.sidebar.header("Modelo")
-    st.sidebar.code(str(config.cnn_checkpoint))
+    st.sidebar.code(str(_CHECKPOINT))
     st.sidebar.write(f"Device: `{device}`")
 
     uploaded_file = st.file_uploader(
@@ -69,7 +72,7 @@ def run_app() -> None:
         return
 
     try:
-        predictor = CNNPredictor.from_checkpoint(config.cnn_checkpoint, device)
+        predictor = CNNPredictor.from_checkpoint(_CHECKPOINT, device)
         prediction = predictor.predict(aligned_image)
     except (FileNotFoundError, RuntimeError, ValueError) as error:
         st.error(str(error))

@@ -3,7 +3,7 @@
 **Asignatura:** Deep Learning (2026-01) — Universidad Católica del Norte  
 **Profesor:** Dr. Juan Bekios Calfa  
 **Autores:** Nabil Haddad Pomar · Tomás Méndez Díaz  
-**Repositorio:** https://github.com/PLACEHOLDER/lab03-deep-learning
+**Repositorio:** https://github.com/NabilHadd/Deep_Learning/tree/master/Lab_03
 
 > Las etiquetas de género de UTKFace describen la anotación del dataset, no la identidad de género de una persona. El modelo puede reproducir sesgos y no debe usarse para tomar decisiones sobre personas reales.
 
