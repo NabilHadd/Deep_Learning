@@ -87,7 +87,7 @@ UTKFACE_DIR=/ruta/a/UTKFace
 CNN_CHECKPOINT=artifacts/checkpoints/resnet_aligned_base/best_model.pt
 ```
 
-El dataset debe contener archivos con nombres como `25_1_2_20170116174525125.jpg` (edad_género_raza_timestamp).
+El dataset debe contener archivos con nombres como `25_1_2_20170116174525125.jpg` (edad_género_raza_timestamp) basicamente el mismo formato que sigue UTKFace.
 
 ---
 
@@ -104,7 +104,7 @@ python main.py --experiment resnet_finetuning_lambda_high
 python main.py --all
 ```
 
-Los experimentos completados se saltan automáticamente si `artifacts/checkpoints/<nombre>/best_model.pt` ya existe. Para forzar el reentrenamiento, elimina el checkpoint correspondiente.
+Los experimentos completados se saltan automáticamente si `artifacts/checkpoints/<nombre>/best_model.pt` ya existe. Para forzar el reentrenamiento debes eliminar el respectivo checkpoint.
 
 ---
 
@@ -115,7 +115,7 @@ streamlit run streamlit_main.py
 ```
 
 La app permite subir una foto, la pasa por el mismo pipeline FaceAligner usado en E6 y predice género y edad con el modelo configurado en `CNN_CHECKPOINT`. Soporta modelos CNN, MLP y ResNet.
-
+Ademas hay una versión desplegada que utiliza el modelo resultante del experimento E6 "resnet_aligned_base". Para probarla accede al siguiente [link](deep-learning-nabil.streamlit.app)
 ---
 
 ## Experimentos
@@ -131,10 +131,3 @@ La app permite subir una foto, la pasa por el mismo pipeline FaceAligner usado e
 
 Partición: 70/15/15 (entrenamiento/validación/prueba), semilla 42 fija para todos los experimentos.
 
----
-
-## Tests
-
-```bash
-python -m pytest
-```
