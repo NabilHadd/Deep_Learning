@@ -114,7 +114,8 @@ Los experimentos completados se saltan automáticamente si `artifacts/checkpoint
 streamlit run streamlit_main.py
 ```
 La app permite subir una foto, la pasa por el mismo pipeline FaceAligner usado en E6 y predice género y edad con el modelo configurado en el .env. Soporta modelos CNN, MLP y ResNet.
-Ademas hay una versión desplegada que utiliza el modelo resultante del experimento E6 "resnet_aligned_base". Para probarla accede al siguiente [link](deep-learning-nabil.streamlit.app)
+
+Ademas hay una versión desplegada que utiliza el modelo resultante del experimento E6 "resnet_aligned_base". Para probarla accede al siguiente [link](https://deep-learning-nabil.streamlit.app/)
 
 ---
 
